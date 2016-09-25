@@ -6,7 +6,11 @@
 	<property name="output" location="testbin" />
 
 	<!-- メイン 初期処理→コンパイル→圧縮を呼び出した後にメッセージ表示  -->
-	<target name="main" depends="init,compaile,compress">
+	<target name="main" depends="init">
+		<echo message="Project build start."/>
+		<antcall target="compaile"/>
+		<antcall target="compress"/>
+		<echo message="Project build end."/>
 		<echo>${message}</echo>
 	</target>
 
