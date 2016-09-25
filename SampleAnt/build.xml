@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sample" default="main">
+
+	<property name="message" value="!!!!!Build End!!!!!" />
+	<property name="src" location="src" />
+	<property name="output" location="testbin" />
+
+	<!-- メイン 初期処理→コンパイル→圧縮を呼び出した後にメッセージ表示  -->
+	<target name="main" depends="init,compaile,compress">
+		<echo>${message}</echo>
+	</target>
+
+	<!-- 初期処理 出力先フォルダ作成 -->
+	<target name="init">
+		<mkdir dir="${output}"/>
+	</target>
+
+	<!-- コンパイル -->
+	<target name="compaile">
+		<javac srcdir="${src}" destdir="${output}" includeantruntime="false"/>
+	</target>
+
+	<!-- 圧縮 -->
+	<target name="compress">
+		<jar destfile="Main.jar" basedir="${output}">
+			<manifest>
+    			<attribute name="Main-Class" value="main.Main" />
+    	     </manifest>
+		</jar>
+	</target>
+
+</project>
