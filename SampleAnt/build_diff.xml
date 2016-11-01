@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sample" default="all" basedir=".">
+	<!-- 注意：実行前に以下の設定を行うこと -->
+	<!-- ①自動的にビルドのチェックを外すこと -->
+	<!-- ②実行の構成からJREタブで「ワークスペースと同じJREで実行」にチェックをいれること -->
+	<!-- 参考：http://qiita.com/peanuts2013/items/8715166d655a2c66c740 -->
+
+	<!-- ビルド設定 -->
+	<property file="build.properties" />
+
+	<!-- svn設定 -->
+	<property name="svn.path" value="C:\hoge\SampleAnt\src" />
+	<property name="svn.url" value="svn://hoge/trunk/src" />
+	<property name="svn.oldrevision" value="156" />
+
+	<!--compile用設定 -->
+	<property name="source" value="C:\hoge\src\common\src;C:\hoge\src;" />
+	<property name="source.common" value="C:\hoge\common\src" />
+	<property name="source.personal" value="C:\hoge\src" />
+	<property name="build" value="./build" />
+	<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+
+	<!--出力フォルダ -->
+	<property name="output.src.old" location="C:\work\old" />
+	<property name="output.src.new" location="C:\work\new" />
+	<property name="output.src.main" location="C:\work\output" />
+
+	<!-- ビルド用jarファイル -->
+	<path id="classpath">
+		<fileset dir="C:\dev\pleiades4.6\tomcat\6\lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="./WebContent/WEB-INF/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="class-path" refid="classpath" />
+
+	<!-- svntaskのjar読込 -->
+	<path id="path.svntask">
+		<fileset dir="C:\tools\svntask-1.0.8">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!-- ant内でsvntaskタスクを定義 -->
+	<taskdef resource="com/googlecode/svntask/svntask.xml" classpathref="path.svntask" />
+
+	<!-- 初期化 -->
+	<target name="init">
+
+	</target>
+
+	<!-- all 全て実行 -->
+	<target name="all" depends="init">
+		<echo message="${class-path}" />
+		<antcall target="svnSwitchOld" />
+		<antcall target="compile" />
+		<antcall target="copyOldClass" />
+		<antcall target="svnSwitchNew" />
+		<antcall target="compile" />
+		<antcall target="copyNewClass" />
+		<antcall target="diffCopy" />
+	</target>
+
+	<!-- SVNを旧バージョンにSwitch -->
+	<target name="svnSwitchOld" depends="init">
+		<svn>
+			<switch svnurl="${svn.url}" revision="${svn.oldrevision}" path="${svn.path}" />
+		</svn>
+	</target>
+
+	<!-- SVNを新バージョンにSwitch -->
+	<target name="svnSwitchNew" depends="init">
+		<svn>
+			<switch svnurl="${svn.url}" path="${svn.path}" />
+		</svn>
+	</target>
+
+	<!-- コンパイル -->
+	<target name="compile" depends="init">
+		<delete dir="${build}/classes" />
+		<mkdir dir="${build}/classes" />
+		<javac srcdir="${source}"
+			destdir="${build}/classes"
+			classpathref="classpath"
+			classpath="./WebContent/WEB-INF/classes"
+			encoding="${ENCODING}"
+			target="1.7"
+			source="1.7"
+			debug="on"
+			optimize="off"
+			deprecation="off"
+			includeantruntime="false" />
+		<copy todir="${build}/classes">
+			<fileset dir="${source.common}">
+				<include name="**/*.properties" />
+			</fileset>
+			<fileset dir="${source.personal}">
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!--旧クラスファイルコピー -->
+	<target name="copyOldClass" depends="init">
+		<delete dir="${output.src.old}" />
+		<mkdir dir="${output.src.old}" />
+		<copydir src="${build}/classes" dest="${output.src.old}" />
+	</target>
+
+	<!--新クラスファイルコピー -->
+	<target name="copyNewClass" depends="init">
+		<delete dir="${output.src.new}" />
+		<mkdir dir="${output.src.new}" />
+		<copydir src="${build}/classes" dest="${output.src.new}" />
+	</target>
+
+	<!-- 差分ファイルの取得 -->
+	<target name="diffCopy">
+		<delete dir="${output.src.main}" />
+		<mkdir dir="${output.src.main}" />
+		<fileset id="diffFiles" dir="${output.src.new}">
+			<!-- includes(収集対象となるファイルを指定。「**」を指定すると、サブディレクトリーを含む) -->
+			<include name="**/*" />
+			<!-- exclude(収集対象外となるファイルを指定。「**」を指定すると、サブディレクトリーを含む) -->
+			<exclude name="**/*.txt" />
+			<!-- ignoreFileTimes（TRUE=時間差は無理） -->
+			<different targetdir="${output.src.old}" ignoreFileTimes="true" />
+		</fileset>
+		<!-- 差分ファイルのコンソール出力 -->
+		<echo message="${toString:diffFiles}" />
+		<!-- 差分ファイルのコピー -->
+		<copy todir="${output.src.main}">
+			<fileset refid="diffFiles">
+			</fileset>
+		</copy>
+	</target>
+
+</project>
