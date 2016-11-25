@@ -4,6 +4,7 @@
 	<!-- ①自動的にビルドのチェックを外すこと -->
 	<!-- ②実行の構成からJREタブで「ワークスペースと同じJREで実行」にチェックをいれること -->
 	<!-- 参考：http://qiita.com/peanuts2013/items/8715166d655a2c66c740 -->
+	<!-- 参考：http://qiita.com/shela/items/2eb2f1ea5f1f1f58eccc -->
 
 	<!-- ビルド設定 -->
 	<property file="build.properties" />
@@ -88,10 +89,10 @@
 			encoding="${ENCODING}"
 			target="1.7"
 			source="1.7"
-			debug="on"
-			optimize="off"
-			deprecation="off"
-			includeantruntime="false" />
+			includeAntRuntime="false"
+			debug="true" debuglevel="lines,vars,source">
+			<compilerarg line="-preserveAllLocals" />
+		</javac>
 		<copy todir="${build}/classes">
 			<fileset dir="${source.common}">
 				<include name="**/*.properties" />
