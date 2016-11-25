@@ -5,6 +5,9 @@
 	<!-- ②実行の構成からJREタブで「ワークスペースと同じJREで実行」にチェックをいれること -->
 	<!-- 参考：http://qiita.com/peanuts2013/items/8715166d655a2c66c740 -->
 	<!-- 参考：http://qiita.com/shela/items/2eb2f1ea5f1f1f58eccc -->
+	<!-- 参考：http://www.sdmemo.com/wiki/Ant%E3%81%A7Subversion%E3%81%AE%E3%83%AA%E3%83%93%E3%82%B8%E3%83%A7%E3%83%B3%E3%82%92%E5%8F%96%E5%BE%97#SVNKit -->
+	<!-- svntask取得先：https://code.google.com/archive/p/svntask/ -->
+	<!-- svnkit取得先：http://svnkit.com/ -->
 
 	<!-- ビルド設定 -->
 	<property file="build.properties" />
