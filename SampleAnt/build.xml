@@ -1,36 +1,75 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="sample" default="main">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="Methods">
 
-	<property name="message" value="!!!!!Build End!!!!!" />
-	<property name="src" location="src" />
-	<property name="output" location="testbin" />
+	<!-- ビルド設定 -->
+	<property file="\build.properties" />
 
-	<!-- メイン 初期処理→コンパイル→圧縮を呼び出した後にメッセージ表示  -->
-	<target name="main" depends="init">
-		<echo message="Project build start."/>
-		<antcall target="compaile"/>
-		<antcall target="compress"/>
-		<echo message="Project build end."/>
-		<echo>${message}</echo>
+	<property environment="env" />
+
+	<property name="phase1_src.link" value="${src_phase1.pathvariable}/MethodsServer/src" />
+
+	<property name="phase2_src.link" value="${src_phase2.pathvariable}/MethodsServer/src" />
+	<property name="phase2_common_src.link" value="${src_phase2.pathvariable}/common/src" />
+	<property name="phase1_common_src.link" value="${src_phase1.pathvariable}/common/src" />
+
+
+	<path id="Methods.classpath">
+		<fileset dir="lib" includes="*.jar"/>
+		<fileset dir="Addlib" includes="*.jar"/>
+	</path>
+
+	<!-- クリーン -->
+	<target name="clean">
+		<delete dir="bin" />
 	</target>
 
-	<!-- 初期処理 出力先フォルダ作成 -->
+
+	<!-- 初期化 -->
 	<target name="init">
-		<mkdir dir="${output}"/>
+		<!-- フォルダ作成 -->
+		<mkdir dir="bin" />
+
+		<!-- binへjava以外(設定系)のコピー -->
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="${phase1_src.link}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="${phase2_src.link}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="${phase2_common_src.link}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="${phase1_common_src.link}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
 	</target>
 
-	<!-- コンパイル -->
-	<target name="compaile">
-		<javac srcdir="${src}" destdir="${output}" includeantruntime="false"/>
+
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}" encoding="${ENCODING}" executable="${compiler}">
+			<src path="${phase1_src.link}" />
+			<src path="${phase2_src.link}" />
+			<src path="${phase2_common_src.link}" />
+			<src path="${phase1_common_src.link}" />
+			<classpath refid="Methods.classpath" />
+		</javac>
 	</target>
 
-	<!-- 圧縮 -->
-	<target name="compress">
-		<jar destfile="Main.jar" basedir="${output}">
-			<manifest>
-    			<attribute name="Main-Class" value="main.Main" />
-    	     </manifest>
-		</jar>
-	</target>
+	<!-- ビルドセット -->
+	<target depends="clean,build-project" name="build" />
 
 </project>
