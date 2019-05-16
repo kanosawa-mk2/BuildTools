@@ -4,72 +4,109 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="Methods">
+<project basedir="." default="out_war" name="webtopro_v16_4">
 
 	<!-- ビルド設定 -->
-	<property file="\build.properties" />
+	<property file="C:\pleiades4.8\workspace\00_UnitTestPj\build.properties" />
 
 	<property environment="env" />
 
-	<property name="phase1_src.link" value="${src_phase1.pathvariable}/MethodsServer/src" />
+	<property name="common_src.link" value="${src_phase1.pathvariable}/src/common/src" />
+	<property name="src.link" value="${src_phase1.pathvariable}/src/webtopro/src" />
 
-	<property name="phase2_src.link" value="${src_phase2.pathvariable}/MethodsServer/src" />
-	<property name="phase2_common_src.link" value="${src_phase2.pathvariable}/common/src" />
-	<property name="phase1_common_src.link" value="${src_phase1.pathvariable}/common/src" />
+	<property name="common.strings.link" value="${src_phase1.pathvariable}/src/common/strings" />
+	<property name="common.jsp.link" value="${src_phase1.pathvariable}/src/common/jsp" />
+	<property name="common.config.link" value="${src_phase1.pathvariable}/src/common/config" />
 
+	<!-- classpath 設定 -->
+	<path id="Web App ライブラリー.libraryclasspath">
+		<fileset dir="WebContent/WEB-INF/lib" includes="*.jar"/>
+		<pathelement location="WebContent/WEB-INF/classes" />
+	</path>
 
-	<path id="Methods.classpath">
-		<fileset dir="lib" includes="*.jar"/>
-		<fileset dir="Addlib" includes="*.jar"/>
+	<path id="Apache Tomcat v9.0 [Apache Tomcat v9.0.8].libraryclasspath">
+		<fileset dir="../../tomcat/apache-tomcat-9.0.8/lib" includes="*.jar"/>
+	</path>
+
+	<path id="webapp.classpath">
+		<pathelement location="build/classes" />
+		<path refid="Web App ライブラリー.libraryclasspath" />
+		<path refid="Apache Tomcat v9.0 [Apache Tomcat v9.0.8].libraryclasspath" />
 	</path>
 
 	<!-- クリーン -->
 	<target name="clean">
-		<delete dir="bin" />
+		<delete dir="build/classes" />
+		<delete dir="work" />
 	</target>
-
 
 	<!-- 初期化 -->
 	<target name="init">
-		<!-- フォルダ作成 -->
-		<mkdir dir="bin" />
+		<echo message="${src_phase1.pathvariable}"/>
+		<echo message="${src_phase2.pathvariable}"/>
+		<echo message="${common_src.link}"/>
+		<echo message="${src.link}"/>
+		<echo message="${compiler}"/>
 
-		<!-- binへjava以外(設定系)のコピー -->
-		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="${phase1_src.link}">
+
+		<!-- フォルダ作成 -->
+		<mkdir dir="build/classes" />
+
+		<!-- build/classesへjava以外(設定系)のコピー -->
+		<copy includeemptydirs="false" todir="build/classes">
+			<fileset dir="${common_src.link}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="${phase2_src.link}">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
-		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="${phase2_common_src.link}">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
-		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="${phase1_common_src.link}">
+		<copy includeemptydirs="false" todir="build/classes">
+			<fileset dir="${src.link}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
 	</target>
 
-
+	<!-- ビルド -->
 	<target depends="init" name="build-project">
-		<echo message="${ant.project.name}: ${ant.file}" />
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}" encoding="${ENCODING}" executable="${compiler}">
-			<src path="${phase1_src.link}" />
-			<src path="${phase2_src.link}" />
-			<src path="${phase2_common_src.link}" />
-			<src path="${phase1_common_src.link}" />
-			<classpath refid="Methods.classpath" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="build/classes" includeantruntime="false" source="${source}" target="${target}" encoding="${ENCODING}" executable="${compiler}">
+			<src path="${common_src.link}" />
+			<src path="${src.link}" />
+			<classpath refid="webapp.classpath" />
 		</javac>
+	</target>
+
+	<!-- リンクされたリソースファイル要に作業ディレクトリにコピー -->
+	<target name="copyworkdir">
+		<mkdir dir="work" />
+		<!-- includeemptydirs falseにすると、空のディレクトリーは転送先で削除される。 -->
+		<copy includeemptydirs="false" todir="work/WebContent" overwrite="yes">
+			<fileset dir="WebContent" />
+		</copy>
+		<copy includeemptydirs="false" todir="work/WebContent/custom" overwrite="yes">
+			<fileset dir="${custom.link}" />
+		</copy>
+		<copy includeemptydirs="false" todir="work/WebContent/custom/config/common" overwrite="yes">
+			<fileset dir="${common.config.link}" />
+		</copy>
+		<copy includeemptydirs="false" todir="work/WebContent/custom/jsp/common" overwrite="yes">
+			<fileset dir="${common.jsp.link}" />
+		</copy>
+		<copy includeemptydirs="false" todir="work/WebContent/custom/strings/common" overwrite="yes">
+			<fileset dir="${common.strings.link}" />
+		</copy>
+
 	</target>
 
 	<!-- ビルドセット -->
 	<target depends="clean,build-project" name="build" />
+
+	<!-- WAR作成 -->
+	<target depends="build,copyworkdir" name="out_war">
+		<war destfile="./web.war" webxml="work/WebContent/WEB-INF/web.xml">
+			<fileset dir="work/WebContent" />
+			<classes dir="build/classes" />
+		</war>
+	</target>
+
+
 
 </project>
