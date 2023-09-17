@@ -11,6 +11,7 @@
 	<property name="target" value="1.8" />
 	<property name="source" value="1.8" />
 	<path id="Apache Tomcat v8.5 [Tomcat8 (Java8)].libraryclasspath">
+		<!--
 		<pathelement location="../../tomcat/8/lib/annotations-api.jar" />
 		<pathelement location="../../tomcat/8/lib/catalina-ant.jar" />
 		<pathelement location="../../tomcat/8/lib/catalina-ha.jar" />
@@ -36,6 +37,8 @@
 		<pathelement location="../../tomcat/8/lib/tomcat-util.jar" />
 		<pathelement location="../../tomcat/8/lib/tomcat-websocket.jar" />
 		<pathelement location="../../tomcat/8/lib/websocket-api.jar" />
+		-->
+		<filelist dir="../../tomcat/8/lib" includes="*.jar"></filelist>
 	</path>
 	<path id="Web App ライブラリー.libraryclasspath">
 		<pathelement location="WebContent/WEB-INF/lib/commons-lang3-3.8.1.jar" />
